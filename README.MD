@@ -4,6 +4,8 @@
 
 `Parallax` 를 이용하여 배경이 스크롤 될때 마다 조금씩 움직이는 효과를 이용했어
 
+참고로 헤스티아는 내가 직접 그렸어 ^^7
+
 * 구동 화면
 
 ![image](screenshot/hestia-familia-page.gif)
