@@ -1,9 +1,15 @@
 .container {
     max-width: 960px;
     margin: 0 auto;
-    background: #f9f9f9;
+    background: #676F77;
     font-size: 24px;
     padding: 25px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+body {
+    background-color: #2B2D2F;
 }
 
 .parallax-bak {
@@ -16,8 +22,40 @@
 }
 
 .parallax {
+    /* padding: 300px 35px; */
     min-height: 500px;
+    max-height: 800px;
     background: transparent;
+    padding-top: 500px;
+    padding-left: 35px;
+    padding-right: 35px;
+}
+
+.info {
+    color: white;
+    z-index: 2;
+    position: relative;
+}
+
+.hestia {
+    background-image: url('../img/hestia\ familia.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* background-attachment: fixed; */
+    z-index: 2;
+    position: relative;
+    height: 900px;
+}
+
+.block {
+    height: 500px;
+    width: 100%;
+    line-height: 500px;
+    text-align: center;
+    font-size: 40px;
+    font-family: 'Nanum Gothic', sans-serif;
+    color: white;
 }
 
 p {
