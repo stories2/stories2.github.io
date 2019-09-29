@@ -6,13 +6,18 @@
     padding: 25px;
 }
 
-.parallax {
+.parallax-bak {
     background-image: url('../img/akihabara.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
     background-attachment: fixed;
     height: 600px;
+}
+
+.parallax {
+    min-height: 500px;
+    background: transparent;
 }
 
 p {
