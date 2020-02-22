@@ -20,12 +20,20 @@
 </template>
 
 <script>
+import { utils } from 'pixi.js';
 export default {
   name: 'app',
   data () {
     return {
       msg: 'Welcome to Your Vue.js App'
     }
+  },
+  created: function() {
+     let type = 'WebGL';
+     if (!utils.isWebGLSupported()) {
+       type = 'canvas'
+     }
+     utils.sayHello(type);
   }
 }
 </script>
