@@ -1,15 +1,18 @@
-# 깃 허브 페이지
+# after-warrior-gone
 
-그냥 저냥 자기만의 페이지가 있다는건 기분이 좋잖아?
+> A Vue.js project
 
-`Parallax` 를 이용하여 배경이 스크롤 될때 마다 조금씩 움직이는 효과를 이용했어
+## Build Setup
 
-참고로 헤스티아는 내가 직접 그렸어 ^^7
+``` bash
+# install dependencies
+npm install
 
-* 구동 화면
+# serve with hot reload at localhost:8080
+npm run dev
 
-![image](screenshot/hestia-familia-page.gif)
+# build for production with minification
+npm run build
+```
 
-* 전체 화면
-
-![image](screenshot/hestia-familia-page.png)
+For detailed explanation on how things work, consult the [docs for vue-loader](http://vuejs.github.io/vue-loader).
