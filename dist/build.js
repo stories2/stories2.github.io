@@ -20702,6 +20702,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     return {
       pixiApp: null,
       digChanSprite: null,
+      pixiContainer: null,
       ratio: 1
     };
   },
@@ -20711,10 +20712,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
   },
   beforeCreate: function beforeCreate() {
     var type = 'WebGL';
-    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* utils */].isWebGLSupported()) {
+    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* utils */].isWebGLSupported()) {
       type = 'canvas';
     }
-    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* utils */].sayHello(type);
+    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* utils */].sayHello(type);
   },
   created: function created() {
     console.log('event reg');
@@ -20722,14 +20723,14 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
   },
   mounted: function mounted() {
     var options = {
-      width: screen.availWidth,
-      height: screen.availHeight,
+      width: 800,
+      height: 600,
       transparent: false,
       antialias: true,
-      resolution: 1
+      resolution: window.devicePixelRatio || 1
     };
 
-    this.ratio = screen.availWidth / screen.availHeight;
+    this.ratio = options.width / options.height;
 
     console.log('pixi options', options);
     this.pixiApp = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["a" /* Application */](options);
@@ -20741,21 +20742,32 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     this.pixiApp.renderer.autoResize = true;
     this.pixiApp.renderer.view.style.position = "absolute";
     this.pixiApp.renderer.view.style.display = "block";
-    this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
+
+    this.pixiContainer = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["b" /* Container */]();
+    this.pixiContainer.x = this.pixiApp.screen.width / 2;
+    this.pixiContainer.y = this.pixiApp.screen.height / 2;
+
+    this.pixiContainer.pivot.x = this.pixiContainer.width / 2;
+    this.pixiContainer.pivot.y = this.pixiContainer.height / 2;
+    // this.pixiApp.renderer.resize(options.width, options.height);
     // this.pixiApp.renderer.resize(512, 512);
 
     this.resourceLoader();
+
+    this.pixiApp.ticker.add(function (delta) {
+      // console.log(`delta ${delta}`)
+    });
   },
   methods: {
     handleResize: function handleResize($event) {
       console.log('set pixi app size ' + window.innerWidth + ' x ' + window.innerHeight);
-      this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
+      // this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
 
-      this.ratio = screen.innerWidth / screen.innerHeight;
+      // this.ratio = screen.innerWidth / screen.innerHeight
     },
     resourceLoader: function resourceLoader() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]
-      this.digChanSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["b" /* Sprite */].from('dist/assets/dig-chan.png');
+      this.digChanSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Sprite */].from('dist/assets/dig-chan.png');
 
       console.log('sprite', this.digChanSprite);
 
@@ -20768,10 +20780,12 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       this.digChanSprite.anchor.x = 0.5;
       this.digChanSprite.anchor.y = 0.5;
 
-      this.digChanSprite.x = screen.width / 2;
-      this.digChanSprite.y = screen.height / 2;
+      this.digChanSprite.x = 400;
+      this.digChanSprite.y = 300;
 
       this.digChanSprite.rotation = -0.25;
+
+      console.log('xy ' + this.digChanSprite.x + ' ' + this.digChanSprite.y);
     }
   },
   components: {}
@@ -48582,7 +48596,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5124f846_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_ba111f92_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48602,7 +48616,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5124f846_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_ba111f92_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48623,7 +48637,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("ef0f5a80", content, true, {});
+var update = __webpack_require__(35)("c4ee1976", content, true, {});
 
 /***/ }),
 /* 33 */
@@ -48634,7 +48648,7 @@ exports = module.exports = __webpack_require__(34)(false);
 
 
 // module
-exports.push([module.i, "div{height:100%}", ""]);
+exports.push([module.i, "div{height:100%}canvas{max-width:800px}", ""]);
 
 // exports
 
@@ -49105,7 +49119,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pixi_interaction__ = __webpack_require__(15);
 /* unused harmony reexport interaction */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pixi_utils__ = __webpack_require__(1);
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pixi_app__ = __webpack_require__(16);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_4__pixi_app__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pixi_core__ = __webpack_require__(0);
@@ -49138,7 +49152,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23__pixi_constants__ = __webpack_require__(5);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24__pixi_display__ = __webpack_require__(3);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_24__pixi_display__["b"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__pixi_graphics__ = __webpack_require__(21);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__pixi_math__ = __webpack_require__(2);
@@ -49150,7 +49164,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__pixi_runner__ = __webpack_require__(17);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__ = __webpack_require__(8);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__pixi_sprite_animated__ = __webpack_require__(64);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pixi_text__ = __webpack_require__(22);
