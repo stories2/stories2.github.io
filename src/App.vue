@@ -108,5 +108,7 @@ export default {
   }
   canvas {
     max-width: 800px;
+    width: 100%;
+    height: auto;
   }
 </style>
