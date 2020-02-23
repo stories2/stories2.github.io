@@ -4,13 +4,14 @@
 </template>
 
 <script>
-import { utils, Application, Sprite, stage} from 'pixi.js';
+import { utils, Application, Sprite, stage, Container } from 'pixi.js';
 export default {
   name: 'app',
   data () {
     return {
       pixiApp: null,
       digChanSprite: null,
+      pixiContainer: null,
       ratio: 1
     }
   },
@@ -30,14 +31,14 @@ export default {
   },
   mounted: function() {
     const options = {
-      width: screen.availWidth,
-      height: screen.availHeight,
+      width: 800,
+      height: 600,
       transparent: false,
       antialias: true,
-      resolution: 1
+      resolution: window.devicePixelRatio || 1
     };
 
-    this.ratio = screen.availWidth / screen.availHeight
+    this.ratio = options.width / options.height
 
     console.log('pixi options', options);
     this.pixiApp = new Application(options)
@@ -49,17 +50,28 @@ export default {
     this.pixiApp.renderer.autoResize = true;
     this.pixiApp.renderer.view.style.position = "absolute";
     this.pixiApp.renderer.view.style.display = "block";
-    this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
+
+    this.pixiContainer = new Container();
+    this.pixiContainer.x = this.pixiApp.screen.width / 2;
+    this.pixiContainer.y = this.pixiApp.screen.height / 2;
+
+    this.pixiContainer.pivot.x = this.pixiContainer.width / 2;
+    this.pixiContainer.pivot.y = this.pixiContainer.height / 2;
+    // this.pixiApp.renderer.resize(options.width, options.height);
     // this.pixiApp.renderer.resize(512, 512);
 
     this.resourceLoader();
+
+    this.pixiApp.ticker.add((delta) => {
+      // console.log(`delta ${delta}`)
+    })
   },
   methods: {
     handleResize: function($event) {
       console.log(`set pixi app size ${window.innerWidth} x ${window.innerHeight}`);
-      this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
+      // this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
 
-      this.ratio = screen.innerWidth / screen.innerHeight
+      // this.ratio = screen.innerWidth / screen.innerHeight
     },
     resourceLoader: function() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]
@@ -76,10 +88,12 @@ export default {
       this.digChanSprite.anchor.x = 0.5
       this.digChanSprite.anchor.y = 0.5
 
-      this.digChanSprite.x = screen.width / 2;
-      this.digChanSprite.y = screen.height / 2
+      this.digChanSprite.x = 400;
+      this.digChanSprite.y = 300
 
       this.digChanSprite.rotation = -0.25;
+
+      console.log(`xy ${this.digChanSprite.x} ${this.digChanSprite.y}`)
     }
   },
   components: {
@@ -91,5 +105,8 @@ export default {
 <style>
   div {
     height: 100%;
+  }
+  canvas {
+    max-width: 800px;
   }
 </style>
