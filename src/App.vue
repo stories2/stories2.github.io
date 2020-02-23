@@ -105,6 +105,10 @@ export default {
 <style>
   div {
     height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
   }
   canvas {
     max-width: 800px;
