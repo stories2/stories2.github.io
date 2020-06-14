@@ -4,7 +4,7 @@
 </template>
 
 <script>
-import { utils, Application, Sprite, stage, Container } from 'pixi.js';
+import { utils, Application, Sprite, stage, Container, RenderTexture, Texture, Rectangle } from 'pixi.js';
 export default {
   name: 'app',
   data () {
@@ -77,11 +77,23 @@ export default {
     },
     gameSpriteLoader: function() {
       this.gameSprite = Sprite.from('dist/assets/tile-set.png');
-      this.pixiApp.stage.addChild(this.gameSprite);
+      // this.pixiApp.stage.addChild(this.gameSprite);
       const ratio = this.gameSprite.width / this.gameSprite.height;
 
       this.gameSprite.width = 500;
       this.gameSprite.height = 500 * ratio;
+
+      const renderTexture = new RenderTexture(48, 48);
+
+      const subTexture = new Texture(this.gameSprite._texture, new Rectangle(719, 1241, 512, 512));
+      const subSprite = Sprite.from(subTexture);
+      subSprite.width = 128;
+      subSprite.height = 128;
+      subSprite.x = 0;
+      subSprite.y = 0;
+      console.log('sub', subSprite);
+      console.log('sub', this.gameSprite);
+      this.pixiApp.stage.addChild(subSprite);
     },
     resourceLoader: function() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]

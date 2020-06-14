@@ -20702,6 +20702,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     return {
       pixiApp: null,
       digChanSprite: null,
+      gameSprite: null,
       pixiContainer: null,
       ratio: 1
     };
@@ -20712,10 +20713,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
   },
   beforeCreate: function beforeCreate() {
     var type = 'WebGL';
-    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* utils */].isWebGLSupported()) {
+    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* utils */].isWebGLSupported()) {
       type = 'canvas';
     }
-    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* utils */].sayHello(type);
+    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* utils */].sayHello(type);
   },
   created: function created() {
     console.log('event reg');
@@ -20753,6 +20754,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     // this.pixiApp.renderer.resize(512, 512);
 
     this.resourceLoader();
+    this.gameSpriteLoader();
 
     this.pixiApp.ticker.add(function (delta) {
       // console.log(`delta ${delta}`)
@@ -20765,9 +20767,29 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
       // this.ratio = screen.innerWidth / screen.innerHeight
     },
+    gameSpriteLoader: function gameSpriteLoader() {
+      this.gameSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from('dist/assets/tile-set.png');
+      // this.pixiApp.stage.addChild(this.gameSprite);
+      var ratio = this.gameSprite.width / this.gameSprite.height;
+
+      this.gameSprite.width = 500;
+      this.gameSprite.height = 500 * ratio;
+
+      var renderTexture = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* RenderTexture */](48, 48);
+
+      var subTexture = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](719, 1241, 512, 512));
+      var subSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from(subTexture);
+      subSprite.width = 128;
+      subSprite.height = 128;
+      subSprite.x = 0;
+      subSprite.y = 0;
+      console.log('sub', subSprite);
+      console.log('sub', this.gameSprite);
+      this.pixiApp.stage.addChild(subSprite);
+    },
     resourceLoader: function resourceLoader() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]
-      this.digChanSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Sprite */].from('dist/assets/dig-chan.png');
+      this.digChanSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from('dist/assets/dig-chan.png');
 
       console.log('sprite', this.digChanSprite);
 
@@ -48596,7 +48618,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5dccb1eb_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a4cde0dc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48616,7 +48638,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_5dccb1eb_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a4cde0dc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48637,7 +48659,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("1dda7977", content, true, {});
+var update = __webpack_require__(35)("3cc82df4", content, true, {});
 
 /***/ }),
 /* 33 */
@@ -49119,11 +49141,12 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pixi_interaction__ = __webpack_require__(15);
 /* unused harmony reexport interaction */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pixi_utils__ = __webpack_require__(1);
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "g", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pixi_app__ = __webpack_require__(16);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_4__pixi_app__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pixi_core__ = __webpack_require__(0);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["l"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "f", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["p"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pixi_extract__ = __webpack_require__(18);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pixi_loaders__ = __webpack_require__(9);
@@ -49156,7 +49179,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__pixi_graphics__ = __webpack_require__(21);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__pixi_math__ = __webpack_require__(2);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_26__pixi_math__["j"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__pixi_mesh__ = __webpack_require__(26);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__pixi_mesh_extras__ = __webpack_require__(63);
@@ -49164,7 +49187,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__pixi_runner__ = __webpack_require__(17);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__ = __webpack_require__(8);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__pixi_sprite_animated__ = __webpack_require__(64);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pixi_text__ = __webpack_require__(22);
