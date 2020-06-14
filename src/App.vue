@@ -11,6 +11,7 @@ export default {
     return {
       pixiApp: null,
       digChanSprite: null,
+      gameSprite: null,
       pixiContainer: null,
       ratio: 1
     }
@@ -61,6 +62,7 @@ export default {
     // this.pixiApp.renderer.resize(512, 512);
 
     this.resourceLoader();
+    this.gameSpriteLoader();
 
     this.pixiApp.ticker.add((delta) => {
       // console.log(`delta ${delta}`)
@@ -72,6 +74,14 @@ export default {
       // this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
 
       // this.ratio = screen.innerWidth / screen.innerHeight
+    },
+    gameSpriteLoader: function() {
+      this.gameSprite = Sprite.from('dist/assets/tile-set.png');
+      this.pixiApp.stage.addChild(this.gameSprite);
+      const ratio = this.gameSprite.width / this.gameSprite.height;
+
+      this.gameSprite.width = 500;
+      this.gameSprite.height = 500 * ratio;
     },
     resourceLoader: function() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]
