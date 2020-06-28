@@ -20704,7 +20704,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       digChanSprite: null,
       gameSprite: null,
       pixiContainer: null,
-      ratio: 1
+      ratio: 1,
+      player: [],
+      playerSprite: null,
+      animCnt: 0
     };
   },
 
@@ -20723,6 +20726,8 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     window.addEventListener('resize', this.handleResize);
   },
   mounted: function mounted() {
+    var _this = this;
+
     var options = {
       width: 800,
       height: 600,
@@ -20755,9 +20760,16 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
     this.resourceLoader();
     this.gameSpriteLoader();
-
+    var lastDelta = 0;
     this.pixiApp.ticker.add(function (delta) {
       // console.log(`delta ${delta}`)
+      lastDelta += delta;
+      if (_this.playerSprite != null && lastDelta > 30) {
+        console.log('change ' + (_this.animCnt + 1) + ' / ' + lastDelta);
+        _this.animCnt = (_this.animCnt + 1) % 4;
+        lastDelta = 0;
+        _this.playerSprite.texture = _this.player[_this.animCnt];
+      }
     });
   },
   methods: {
@@ -20778,6 +20790,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       var renderTexture = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* RenderTexture */](48, 48);
 
       var subTexture = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](719, 1241, 512, 512));
+      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](719 + 512 * 0, 1241, 512, 512)));
+      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](729 + 512 * 1, 1241, 512, 512)));
+      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](741 + 512 * 2, 1241, 512, 512)));
+      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](752 + 512 * 3, 1241, 512, 512)));
       var subSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from(subTexture);
       subSprite.width = 128;
       subSprite.height = 128;
@@ -20786,6 +20802,13 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       console.log('sub', subSprite);
       console.log('sub', this.gameSprite);
       this.pixiApp.stage.addChild(subSprite);
+
+      this.playerSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from(this.player[0]);
+      this.playerSprite.width = 128;
+      this.playerSprite.height = 128;
+      this.playerSprite.x = 0;
+      this.playerSprite.y = 128;
+      this.pixiApp.stage.addChild(this.playerSprite);
     },
     resourceLoader: function resourceLoader() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]
@@ -48618,7 +48641,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a4cde0dc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2d84b1d7_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48638,7 +48661,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a4cde0dc_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2d84b1d7_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48659,7 +48682,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("3cc82df4", content, true, {});
+var update = __webpack_require__(35)("a5f4c13c", content, true, {});
 
 /***/ }),
 /* 33 */

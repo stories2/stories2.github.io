@@ -13,7 +13,10 @@ export default {
       digChanSprite: null,
       gameSprite: null,
       pixiContainer: null,
-      ratio: 1
+      ratio: 1,
+      player: [],
+      playerSprite: null,
+      animCnt: 0
     }
   },
   beforeDestroy: function () {
@@ -63,9 +66,16 @@ export default {
 
     this.resourceLoader();
     this.gameSpriteLoader();
-
+    let lastDelta = 0;
     this.pixiApp.ticker.add((delta) => {
       // console.log(`delta ${delta}`)
+      lastDelta += delta;
+      if (this.playerSprite != null && lastDelta > 30) {
+        console.log(`change ${this.animCnt + 1} / ${lastDelta}`);
+        this.animCnt = (this.animCnt + 1) % 4;
+        lastDelta = 0;
+        this.playerSprite.texture = this.player[this.animCnt];
+      }
     })
   },
   methods: {
@@ -86,6 +96,10 @@ export default {
       const renderTexture = new RenderTexture(48, 48);
 
       const subTexture = new Texture(this.gameSprite._texture, new Rectangle(719, 1241, 512, 512));
+      this.player.push(new Texture(this.gameSprite._texture, new Rectangle(719 + 512 * 0, 1241, 512, 512)));
+      this.player.push(new Texture(this.gameSprite._texture, new Rectangle(729 + 512 * 1, 1241, 512, 512)));
+      this.player.push(new Texture(this.gameSprite._texture, new Rectangle(741 + 512 * 2, 1241, 512, 512)));
+      this.player.push(new Texture(this.gameSprite._texture, new Rectangle(752 + 512 * 3, 1241, 512, 512)));
       const subSprite = Sprite.from(subTexture);
       subSprite.width = 128;
       subSprite.height = 128;
@@ -94,6 +108,13 @@ export default {
       console.log('sub', subSprite);
       console.log('sub', this.gameSprite);
       this.pixiApp.stage.addChild(subSprite);
+
+      this.playerSprite = Sprite.from(this.player[0]);
+      this.playerSprite.width = 128;
+      this.playerSprite.height = 128;
+      this.playerSprite.x = 0;
+      this.playerSprite.y = 128;
+      this.pixiApp.stage.addChild(this.playerSprite);
     },
     resourceLoader: function() {
       // const texture = utils.TextureCache[require('assets/dig-chan.png')]
