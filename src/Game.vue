@@ -51,7 +51,14 @@
             console.log('all sprites are ready');
             this.spriteInit(this.resourceDict);
             console.log('sprite dict', this.spriteDict)
-            this.pixiApp.stage.addChild(this.spriteDict['full-sample.PNG']);
+            this.addSpritesToStage(this.spriteDict);
+            this.spriteDict['full-sample.PNG'].visible = false;
+            this.spriteDict['face-fuck.PNG'].visible = false;
+            this.spriteDict['face-happy.PNG'].visible = false;
+            this.spriteDict['left-piston-active.PNG'].visible = false;
+            this.spriteDict['left-rotate.PNG'].visible = false;
+            this.spriteDict['right-piston-active.PNG'].visible = false;
+            this.spriteDict['right-rotate.PNG'].visible = false;
           }
         })
         .catch(err => {
@@ -136,6 +143,11 @@
       },
       spriteLoader: function () {
         return Promise.allSettled(this.spriteList.map(i => this.spriteLoad(i)))
+      },
+      addSpritesToStage: function (spriteDict) {
+        Object.keys(spriteDict).forEach(key => {
+          this.pixiApp.stage.addChild(spriteDict[key]);
+        })
       }
     }
   }
