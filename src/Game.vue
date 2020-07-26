@@ -8,6 +8,10 @@
     name: "Game",
     data () {
       return {
+
+        CANVAS_WIDTH: 375,
+        CANVAS_HEIGHT: 667,
+
         pixiApp: null,
         pixiContainer: null,
 
@@ -19,6 +23,7 @@
           'right-normal.PNG', 'right-piston-active.PNG', 'right-piston-normal.PNG',
           'right-rotate.PNG'
         ],
+        resourceDict: {},
         spriteDict: {}
       }
     },
@@ -36,15 +41,17 @@
           console.log('result', result)
           result.forEach(i => {
             if (i.status === 'fulfilled') {
-              this.spriteDict[i.value.path] = i.value.res;
+              this.resourceDict[i.value.path] = i.value.res;
             }
           })
-          console.log('spdict', this.spriteDict)
-
+          console.log('spdict', this.resourceDict)
           if (result.filter(i => i.status !== 'fulfilled').length > 0) {
             alert('Some sprites failed to load.');
           } else {
             console.log('all sprites are ready');
+            this.spriteInit(this.resourceDict);
+            console.log('sprite dict', this.spriteDict)
+            this.pixiApp.stage.addChild(this.spriteDict['full-sample.PNG']);
           }
         })
         .catch(err => {
@@ -54,19 +61,21 @@
 
 
       this.pixiApp.ticker.add((delta) => {
-
       });
     },
 
     beforeDestroy: function () {
       // window.removeEventListener('resize', this.handleResize)
+      this.pixiApp.ticker.remove((delta) => {
+        console.log('before destory delta', delta)
+      }, this.pixiApp);
       delete this.pixiApp;
     },
     methods: {
       initPixiJS: function() {
         const options = {
-          width: 375,
-          height: 667,
+          width: this.CANVAS_WIDTH,
+          height: this.CANVAS_HEIGHT,
           transparent: false,
           antialias: true,
           resolution: window.devicePixelRatio || 1
@@ -87,6 +96,19 @@
         this.pixiContainer.pivot.y = this.pixiContainer.height / 2;
 
         this.$el.appendChild(this.pixiApp.view)
+      },
+      spriteInit: function (resourceDict) {
+        Object.keys(resourceDict).forEach(key => {
+          this.spriteDict[key] = new Sprite(resourceDict[key].texture)
+          this.spriteDict[key].anchor.x = 0;
+          this.spriteDict[key].anchor.y = 0;
+
+          const ratio = this.spriteDict[key].height / this.spriteDict[key].width;
+          this.spriteDict[key].width = this.CANVAS_WIDTH;
+          this.spriteDict[key].height = this.CANVAS_WIDTH * ratio;
+
+          this.spriteDict[key].y = this.CANVAS_HEIGHT - this.spriteDict[key].height;
+        })
       },
       spriteLoad: function (path) {
         return new Promise((resolve, reject) => {
