@@ -20693,147 +20693,159 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 //
 //
 //
-//
 
 
 /* harmony default export */ __webpack_exports__["a"] = ({
-  name: 'app',
+  name: "Game",
   data: function data() {
     return {
+
+      CANVAS_WIDTH: 375,
+      CANVAS_HEIGHT: 667,
+
       pixiApp: null,
-      digChanSprite: null,
-      gameSprite: null,
       pixiContainer: null,
-      ratio: 1,
-      player: [],
-      playerSprite: null,
-      animCnt: 0
+
+      assetsPath: 'src/assets/',
+      spriteList: ['body.PNG', 'face-fuck.PNG', 'face-happy.PNG', 'face-normal.PNG', 'full-sample.PNG', 'left-normal.PNG', 'left-piston-active.PNG', 'left-piston-normal.PNG', 'left-rotate.PNG', 'place-work.PNG', 'right-normal.PNG', 'right-piston-active.PNG', 'right-piston-normal.PNG', 'right-rotate.PNG'],
+      resourceDict: {},
+      spriteDict: {}
     };
   },
 
-  beforeDestroy: function beforeDestroy() {
-    window.removeEventListener('resize', this.handleResize);
-  },
   beforeCreate: function beforeCreate() {
     var type = 'WebGL';
-    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* utils */].isWebGLSupported()) {
+    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* utils */].isWebGLSupported()) {
       type = 'canvas';
     }
-    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* utils */].sayHello(type);
-  },
-  created: function created() {
-    console.log('event reg');
-    window.addEventListener('resize', this.handleResize);
+    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* utils */].sayHello(type);
   },
   mounted: function mounted() {
     var _this = this;
 
-    var options = {
-      width: 800,
-      height: 600,
-      transparent: false,
-      antialias: true,
-      resolution: window.devicePixelRatio || 1
-    };
-
-    this.ratio = options.width / options.height;
-
-    console.log('pixi options', options);
-    this.pixiApp = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["a" /* Application */](options);
-    console.log('pixi app', this.pixiApp);
-
-    this.$el.appendChild(this.pixiApp.view);
-
-    this.pixiApp.renderer.backgroundColor = 0x061639;
-    this.pixiApp.renderer.autoResize = true;
-    this.pixiApp.renderer.view.style.position = "absolute";
-    this.pixiApp.renderer.view.style.display = "block";
-
-    this.pixiContainer = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["b" /* Container */]();
-    this.pixiContainer.x = this.pixiApp.screen.width / 2;
-    this.pixiContainer.y = this.pixiApp.screen.height / 2;
-
-    this.pixiContainer.pivot.x = this.pixiContainer.width / 2;
-    this.pixiContainer.pivot.y = this.pixiContainer.height / 2;
-    // this.pixiApp.renderer.resize(options.width, options.height);
-    // this.pixiApp.renderer.resize(512, 512);
-
-    this.resourceLoader();
-    this.gameSpriteLoader();
-    var lastDelta = 0;
-    this.pixiApp.ticker.add(function (delta) {
-      // console.log(`delta ${delta}`)
-      lastDelta += delta;
-      if (_this.playerSprite != null && lastDelta > 30) {
-        console.log('change ' + (_this.animCnt + 1) + ' / ' + lastDelta);
-        _this.animCnt = (_this.animCnt + 1) % 4;
-        lastDelta = 0;
-        _this.playerSprite.texture = _this.player[_this.animCnt];
+    this.initPixiJS();
+    this.spriteLoader().then(function (result) {
+      console.log('result', result);
+      result.forEach(function (i) {
+        if (i.status === 'fulfilled') {
+          _this.resourceDict[i.value.path] = i.value.res;
+        }
+      });
+      console.log('spdict', _this.resourceDict);
+      if (result.filter(function (i) {
+        return i.status !== 'fulfilled';
+      }).length > 0) {
+        alert('Some sprites failed to load.');
+      } else {
+        console.log('all sprites are ready');
+        _this.spriteInit(_this.resourceDict);
+        console.log('sprite dict', _this.spriteDict);
+        _this.addSpritesToStage(_this.spriteDict);
+        _this.spriteDict['full-sample.PNG'].visible = false;
+        _this.spriteDict['face-fuck.PNG'].visible = false;
+        _this.spriteDict['face-happy.PNG'].visible = false;
+        _this.spriteDict['left-piston-active.PNG'].visible = false;
+        _this.spriteDict['left-rotate.PNG'].visible = false;
+        _this.spriteDict['right-piston-active.PNG'].visible = false;
+        _this.spriteDict['right-rotate.PNG'].visible = false;
       }
+    }).catch(function (err) {
+      console.log('err', err);
+      alert('Error while load sprites.');
     });
+
+    this.pixiApp.ticker.add(function (delta) {});
+  },
+
+  beforeDestroy: function beforeDestroy() {
+    // window.removeEventListener('resize', this.handleResize)
+    this.pixiApp.ticker.remove(function (delta) {
+      console.log('before destory delta', delta);
+    }, this.pixiApp);
+    delete this.pixiApp;
   },
   methods: {
-    handleResize: function handleResize($event) {
-      console.log('set pixi app size ' + window.innerWidth + ' x ' + window.innerHeight);
-      // this.pixiApp.renderer.resize(window.innerWidth, window.innerHeight);
+    initPixiJS: function initPixiJS() {
+      var options = {
+        width: this.CANVAS_WIDTH,
+        height: this.CANVAS_HEIGHT,
+        transparent: false,
+        antialias: true,
+        resolution: window.devicePixelRatio || 1
+      };
 
-      // this.ratio = screen.innerWidth / screen.innerHeight
+      this.pixiApp = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["a" /* Application */](options);
+
+      this.pixiApp.renderer.backgroundColor = 0x061639;
+      this.pixiApp.renderer.autoResize = true;
+      this.pixiApp.renderer.view.style.position = "absolute";
+      this.pixiApp.renderer.view.style.display = "block";
+
+      this.pixiContainer = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["b" /* Container */]();
+      this.pixiContainer.x = this.pixiApp.screen.width / 2;
+      this.pixiContainer.y = this.pixiApp.screen.height / 2;
+
+      this.pixiContainer.pivot.x = this.pixiContainer.width / 2;
+      this.pixiContainer.pivot.y = this.pixiContainer.height / 2;
+
+      this.$el.appendChild(this.pixiApp.view);
     },
-    gameSpriteLoader: function gameSpriteLoader() {
-      this.gameSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from('dist/assets/tile-set.png');
-      // this.pixiApp.stage.addChild(this.gameSprite);
-      var ratio = this.gameSprite.width / this.gameSprite.height;
+    spriteInit: function spriteInit(resourceDict) {
+      var _this2 = this;
 
-      this.gameSprite.width = 500;
-      this.gameSprite.height = 500 * ratio;
+      Object.keys(resourceDict).forEach(function (key) {
+        _this2.spriteDict[key] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* Sprite */](resourceDict[key].texture);
+        _this2.spriteDict[key].anchor.x = 0;
+        _this2.spriteDict[key].anchor.y = 0;
 
-      var renderTexture = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* RenderTexture */](48, 48);
+        var ratio = _this2.spriteDict[key].height / _this2.spriteDict[key].width;
+        _this2.spriteDict[key].width = _this2.CANVAS_WIDTH;
+        _this2.spriteDict[key].height = _this2.CANVAS_WIDTH * ratio;
 
-      var subTexture = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](719, 1241, 512, 512));
-      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](719 + 512 * 0, 1241, 512, 512)));
-      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](729 + 512 * 1, 1241, 512, 512)));
-      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](741 + 512 * 2, 1241, 512, 512)));
-      this.player.push(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Texture */](this.gameSprite._texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Rectangle */](752 + 512 * 3, 1241, 512, 512)));
-      var subSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from(subTexture);
-      subSprite.width = 128;
-      subSprite.height = 128;
-      subSprite.x = 0;
-      subSprite.y = 0;
-      console.log('sub', subSprite);
-      console.log('sub', this.gameSprite);
-      this.pixiApp.stage.addChild(subSprite);
-
-      this.playerSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from(this.player[0]);
-      this.playerSprite.width = 128;
-      this.playerSprite.height = 128;
-      this.playerSprite.x = 0;
-      this.playerSprite.y = 128;
-      this.pixiApp.stage.addChild(this.playerSprite);
+        _this2.spriteDict[key].y = _this2.CANVAS_HEIGHT - _this2.spriteDict[key].height;
+      });
     },
-    resourceLoader: function resourceLoader() {
-      // const texture = utils.TextureCache[require('assets/dig-chan.png')]
-      this.digChanSprite = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */].from('dist/assets/dig-chan.png');
+    spriteLoad: function spriteLoad(path) {
+      var _this3 = this;
 
-      console.log('sprite', this.digChanSprite);
+      return new Promise(function (resolve, reject) {
+        var loader = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* Loader */]();
+        loader.add('' + _this3.assetsPath + path);
+        console.log('current load', '' + _this3.assetsPath + path);
+        loader.onComplete.add(function (e, res) {
+          console.log('ok', '' + _this3.assetsPath + path, e, res);
+          resolve({
+            success: true,
+            path: path,
+            res: res['' + _this3.assetsPath + path]
+          });
+        });
+        loader.onError.add(function (e) {
+          console.log('fail', '' + _this3.assetsPath + path, e);
+          reject({
+            success: false,
+            path: path,
+            res: null
+          });
+        });
+        loader.load();
+      });
+    },
+    spriteLoader: function spriteLoader() {
+      var _this4 = this;
 
-      this.pixiApp.stage.addChild(this.digChanSprite);
+      return Promise.allSettled(this.spriteList.map(function (i) {
+        return _this4.spriteLoad(i);
+      }));
+    },
+    addSpritesToStage: function addSpritesToStage(spriteDict) {
+      var _this5 = this;
 
-      var digChanRatio = this.digChanSprite.width / this.digChanSprite.height;
-      this.digChanSprite.width = 400;
-      this.digChanSprite.height = 400 * digChanRatio;
-
-      this.digChanSprite.anchor.x = 0.5;
-      this.digChanSprite.anchor.y = 0.5;
-
-      this.digChanSprite.x = 400;
-      this.digChanSprite.y = 300;
-
-      this.digChanSprite.rotation = -0.25;
-
-      console.log('xy ' + this.digChanSprite.x + ' ' + this.digChanSprite.y);
+      Object.keys(spriteDict).forEach(function (key) {
+        _this5.pixiApp.stage.addChild(spriteDict[key]);
+      });
     }
-  },
-  components: {}
+  }
 });
 
 /***/ }),
@@ -36266,14 +36278,15 @@ var MeshGeometry = /*@__PURE__*/(function (Geometry) {
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(28);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__App_vue__ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Game__ = __webpack_require__(31);
 
+// import App from './App.vue'
 
 
 new __WEBPACK_IMPORTED_MODULE_0_vue__["a" /* default */]({
   el: '#app',
   render: function render(h) {
-    return h(__WEBPACK_IMPORTED_MODULE_1__App_vue__["a" /* default */]);
+    return h(__WEBPACK_IMPORTED_MODULE_1__Game__["a" /* default */]);
   }
 });
 
@@ -48639,9 +48652,9 @@ process.umask = function() { return 0; };
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__ = __webpack_require__(11);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2d84b1d7_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_4b5b25b6_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48660,8 +48673,8 @@ var __vue_scopeId__ = null
 /* moduleIdentifier (server only) */
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
-  __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_App_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_2d84b1d7_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_App_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_4b5b25b6_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48682,7 +48695,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("a5f4c13c", content, true, {});
+var update = __webpack_require__(35)("7b71eee8", content, true, {});
 
 /***/ }),
 /* 33 */
@@ -48693,7 +48706,7 @@ exports = module.exports = __webpack_require__(34)(false);
 
 
 // module
-exports.push([module.i, "div{height:100%;display:flex;justify-content:center;align-items:center}canvas{max-width:800px;width:100%;height:auto}", ""]);
+exports.push([module.i, "div{height:100%;display:flex;justify-content:center;align-items:center}div canvas{width:auto!important;height:100%!important}", ""]);
 
 // exports
 
@@ -49164,16 +49177,15 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pixi_interaction__ = __webpack_require__(15);
 /* unused harmony reexport interaction */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pixi_utils__ = __webpack_require__(1);
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "g", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pixi_app__ = __webpack_require__(16);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_4__pixi_app__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pixi_core__ = __webpack_require__(0);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["l"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "f", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["p"]; });
+/* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pixi_extract__ = __webpack_require__(18);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pixi_loaders__ = __webpack_require__(9);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_7__pixi_loaders__["b"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__pixi_particles__ = __webpack_require__(19);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__pixi_prepare__ = __webpack_require__(20);
@@ -49202,7 +49214,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__pixi_graphics__ = __webpack_require__(21);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__pixi_math__ = __webpack_require__(2);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_26__pixi_math__["j"]; });
+/* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__pixi_mesh__ = __webpack_require__(26);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__pixi_mesh_extras__ = __webpack_require__(63);
@@ -49210,7 +49222,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__pixi_runner__ = __webpack_require__(17);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__ = __webpack_require__(8);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__pixi_sprite_animated__ = __webpack_require__(64);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pixi_text__ = __webpack_require__(22);
