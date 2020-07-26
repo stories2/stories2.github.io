@@ -23,7 +23,7 @@
           'full-sample.PNG', 'left-normal.PNG', 'left-piston-active.PNG',
           'left-piston-normal.PNG', 'left-rotate.PNG', 'place-work.PNG',
           'right-normal.PNG', 'right-piston-active.PNG', 'right-piston-normal.PNG',
-          'right-rotate.PNG'
+          'right-rotate.PNG', 'tile-set.png'
         ],
         resourceDict: {},
         spriteDict: {},
@@ -128,6 +128,9 @@
           this.spriteDict[key].anchor.x = 0;
           this.spriteDict[key].anchor.y = 0;
 
+          if (key === 'tile-set.png') {
+            return;
+          }
           const ratio = this.spriteDict[key].height / this.spriteDict[key].width;
           this.spriteDict[key].width = this.CANVAS_WIDTH;
           this.spriteDict[key].height = this.CANVAS_WIDTH * ratio;
