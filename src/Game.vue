@@ -3,7 +3,9 @@
 </template>
 
 <script>
-  import { utils, Application, Loader, Sprite, stage, Container, RenderTexture, Texture, Rectangle } from 'pixi.js';
+  import { utils, Application, Loader, Sprite, stage, Container,
+            RenderTexture, Texture, Rectangle,
+            DisplayObject} from 'pixi.js';
   export default {
     name: "Game",
     data () {
@@ -24,7 +26,28 @@
           'right-rotate.PNG'
         ],
         resourceDict: {},
-        spriteDict: {}
+        spriteDict: {},
+        spriteOrder: [
+          {sprite: 'body.PNG', order: 0},
+          {sprite: 'face-fuck.PNG', order: 1}, {sprite: 'face-happy.PNG', order: 1}, {sprite: 'face-normal.PNG', order: 1},
+          {sprite: 'left-normal.PNG', order: 2}, {sprite: 'left-rotate.PNG', order: 2},
+          {sprite: 'right-normal.PNG', order: 2}, {sprite: 'right-rotate.PNG', order: 2},
+          {sprite: 'place-work.PNG', order: 3},
+          {sprite: 'left-piston-normal.PNG', order: 5}, {sprite: 'left-piston-active.PNG', order: 5},
+          {sprite: 'right-piston-normal.PNG', order: 5}, {sprite: 'right-piston-active.PNG', order: 5}
+        ],
+
+        faceMap: {
+          'happy': 'face-happy.PNG',
+          'fuck': 'face-fuck.PNG',
+          'normal': 'face-normal.PNG'
+        },
+
+        player: {
+          face: 'normal',
+          left: false,
+          right: false
+        }
       }
     },
     beforeCreate: function() {
@@ -36,6 +59,7 @@
     },
     mounted: function() {
       this.initPixiJS();
+      this.keyInit();
       this.spriteLoader()
         .then(result => {
           console.log('result', result)
@@ -51,14 +75,7 @@
             console.log('all sprites are ready');
             this.spriteInit(this.resourceDict);
             console.log('sprite dict', this.spriteDict)
-            this.addSpritesToStage(this.spriteDict);
-            this.spriteDict['full-sample.PNG'].visible = false;
-            this.spriteDict['face-fuck.PNG'].visible = false;
-            this.spriteDict['face-happy.PNG'].visible = false;
-            this.spriteDict['left-piston-active.PNG'].visible = false;
-            this.spriteDict['left-rotate.PNG'].visible = false;
-            this.spriteDict['right-piston-active.PNG'].visible = false;
-            this.spriteDict['right-rotate.PNG'].visible = false;
+            this.addSpritesToStage(this.spriteDict, this.spriteOrder);
           }
         })
         .catch(err => {
@@ -68,6 +85,7 @@
 
 
       this.pixiApp.ticker.add((delta) => {
+        this.renderCurrentPlayer(this.spriteDict, this.player)
       });
     },
 
@@ -117,6 +135,58 @@
           this.spriteDict[key].y = this.CANVAS_HEIGHT - this.spriteDict[key].height;
         })
       },
+      keyInit: function() {
+        window.addEventListener('keydown', (e) => {
+          switch (e.key) {
+            case 'ArrowRight':
+              this.player.left = false;
+              this.player.right = true;
+              break;
+            case 'ArrowLeft':
+              this.player.left = true;
+              this.player.right = false;
+              break;
+          }
+        });
+        window.addEventListener('keyup', (e) => {
+          switch (e.key) {
+            case 'ArrowRight':
+              this.player.right = false;
+              break;
+            case 'ArrowLeft':
+              this.player.left = false;
+              break;
+          }
+        });
+        console.log('stage', this.pixiApp.stage)
+        this.pixiApp.renderer.plugins.interaction.on( 'pointerdown', ( event ) => {
+          console.log( event.data.global.x, event.data.global.y, event.data.originalEvent )
+          if (event.data.global.x > this.CANVAS_WIDTH / 2) {
+            this.player.left = false;
+            this.player.right = true;
+          } else {
+            this.player.left = true;
+            this.player.right = false;
+          }
+        });
+        this.pixiApp.renderer.plugins.interaction.on( 'pointerup', ( event ) => {
+          console.log( event.data.global.x, event.data.global.y, event.data.originalEvent )
+          if (event.data.global.x > this.CANVAS_WIDTH / 2) {
+            this.player.right = false;
+          } else {
+            this.player.left = false;
+          }
+        } );
+        // this.pixiApp.stage.mousedown = this.pixiApp.stage.touchstart = (e) => {
+        //   console.log('down', e);
+        // }
+        // this.pixiApp.stage.mouseup = this.pixiApp.stage.touchend = (e) => {
+        //   console.log('up', e);
+        // }
+        // window.addEventListener('keypress', (e) => {
+        //   console.log('keypress', e);
+        // });
+      },
       spriteLoad: function (path) {
         return new Promise((resolve, reject) => {
           const loader = new Loader();
@@ -144,10 +214,60 @@
       spriteLoader: function () {
         return Promise.allSettled(this.spriteList.map(i => this.spriteLoad(i)))
       },
-      addSpritesToStage: function (spriteDict) {
-        Object.keys(spriteDict).forEach(key => {
-          this.pixiApp.stage.addChild(spriteDict[key]);
+      addSpritesToStage: function (spriteDict, order) {
+        order.sort((a, b) => a.order - b.order).forEach(i => {
+          this.pixiApp.stage.addChild(spriteDict[i.sprite]);
         })
+        const _target = new DisplayObject();
+        _target.setInteractive = true;
+        this.pixiApp.stage.addChild(_target);
+      },
+
+      hideSpritesAll: function(spriteDict) {
+        Object.keys(spriteDict).forEach(key => {
+          spriteDict[key].visible = false;
+        })
+      },
+      renderCurrentPlayer: function (spriteDict, player) {
+        this.hideSpritesAll(spriteDict);
+
+        if (Object.keys(spriteDict).length !== this.spriteList.length) {
+          return;
+        }
+
+        spriteDict['body.PNG'].visible = true;
+        spriteDict['place-work.PNG'].visible = true;
+
+        if (player.left) {
+          spriteDict['left-rotate.PNG'].visible = true;
+          spriteDict['left-piston-active.PNG'].visible = true;
+
+          spriteDict['right-normal.PNG'].visible = true;
+          spriteDict['right-piston-normal.PNG'].visible = true;
+        } else if(player.right) {
+          spriteDict['right-rotate.PNG'].visible = true;
+          spriteDict['right-piston-active.PNG'].visible = true;
+
+          spriteDict['left-normal.PNG'].visible = true;
+          spriteDict['left-piston-normal.PNG'].visible = true;
+        } else {
+          spriteDict['left-normal.PNG'].visible = true;
+          spriteDict['left-piston-normal.PNG'].visible = true;
+          spriteDict['right-normal.PNG'].visible = true;
+          spriteDict['right-piston-normal.PNG'].visible = true;
+        }
+
+        switch (player.face) {
+          case 'normal':
+            spriteDict['face-normal.PNG'].visible = true;
+            break;
+          case 'fuck':
+            spriteDict['face-fuck.PNG'].visible = true;
+            break;
+          case 'happy':
+            spriteDict['face-happy.PNG'].visible = true;
+            break;
+        }
       }
     }
   }
