@@ -34,7 +34,8 @@
           {sprite: 'right-normal.PNG', order: 2}, {sprite: 'right-rotate.PNG', order: 2},
           {sprite: 'place-work.PNG', order: 3},
           {sprite: 'left-piston-normal.PNG', order: 5}, {sprite: 'left-piston-active.PNG', order: 5},
-          {sprite: 'right-piston-normal.PNG', order: 5}, {sprite: 'right-piston-active.PNG', order: 5}
+          {sprite: 'right-piston-normal.PNG', order: 5}, {sprite: 'right-piston-active.PNG', order: 5},
+          {sprite: 'black', order: 6}, {sprite: 'white', order: 6}
         ],
 
         faceMap: {
@@ -85,7 +86,9 @@
 
 
       this.pixiApp.ticker.add((delta) => {
-        this.renderCurrentPlayer(this.spriteDict, this.player)
+        this.hideSpritesAll(this.spriteDict);
+        this.renderCurrentPlayer(this.spriteDict, this.player);
+        this.renderCurrentDoll(this.spriteDict);
       });
     },
 
@@ -129,6 +132,17 @@
           this.spriteDict[key].anchor.y = 0;
 
           if (key === 'tile-set.png') {
+            this.spriteDict['white'] = Sprite.from(new Texture(this.spriteDict[key].texture, new Rectangle(719, 1241, 512, 512)));
+            this.spriteDict['white'].width = 128;
+            this.spriteDict['white'].height = 128;
+            this.spriteDict['white'].anchor.x = 0.5;
+            this.spriteDict['white'].anchor.y = 0.5;
+            this.spriteDict['black'] = Sprite.from(new Texture(this.spriteDict[key].texture, new Rectangle(719, 200, 512, 512)));
+            this.spriteDict['black'].width = 128;
+            this.spriteDict['black'].height = 128;
+            this.spriteDict['black'].anchor.x = 0.5;
+            this.spriteDict['black'].anchor.y = 0.5;
+
             return;
           }
           const ratio = this.spriteDict[key].height / this.spriteDict[key].width;
@@ -221,6 +235,7 @@
         order.sort((a, b) => a.order - b.order).forEach(i => {
           this.pixiApp.stage.addChild(spriteDict[i.sprite]);
         })
+
         const _target = new DisplayObject();
         _target.setInteractive = true;
         this.pixiApp.stage.addChild(_target);
@@ -231,10 +246,21 @@
           spriteDict[key].visible = false;
         })
       },
+      renderCurrentDoll: function(spriteDict) {
+        if (!this.spriteDict.hasOwnProperty('black')
+          || !this.spriteDict.hasOwnProperty('white')) {
+          return;
+        }
+        spriteDict['black'].visible = true;
+        spriteDict['black'].x = 192;
+        spriteDict['black'].y = 64;
+        spriteDict['white'].visible = true;
+        spriteDict['white'].x = 64;
+        spriteDict['white'].y = 64;
+      },
       renderCurrentPlayer: function (spriteDict, player) {
-        this.hideSpritesAll(spriteDict);
 
-        if (Object.keys(spriteDict).length !== this.spriteList.length) {
+        if (Object.keys(spriteDict).length < this.spriteList.length) {
           return;
         }
 
