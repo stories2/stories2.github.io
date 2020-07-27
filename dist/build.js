@@ -20707,10 +20707,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       pixiContainer: null,
 
       assetsPath: 'src/assets/',
-      spriteList: ['body.PNG', 'face-fuck.PNG', 'face-happy.PNG', 'face-normal.PNG', 'full-sample.PNG', 'left-normal.PNG', 'left-piston-active.PNG', 'left-piston-normal.PNG', 'left-rotate.PNG', 'place-work.PNG', 'right-normal.PNG', 'right-piston-active.PNG', 'right-piston-normal.PNG', 'right-rotate.PNG'],
+      spriteList: ['body.PNG', 'face-fuck.PNG', 'face-happy.PNG', 'face-normal.PNG', 'full-sample.PNG', 'left-normal.PNG', 'left-piston-active.PNG', 'left-piston-normal.PNG', 'left-rotate.PNG', 'place-work.PNG', 'right-normal.PNG', 'right-piston-active.PNG', 'right-piston-normal.PNG', 'right-rotate.PNG', 'tile-set.png'],
       resourceDict: {},
       spriteDict: {},
-      spriteOrder: [{ sprite: 'body.PNG', order: 0 }, { sprite: 'face-fuck.PNG', order: 1 }, { sprite: 'face-happy.PNG', order: 1 }, { sprite: 'face-normal.PNG', order: 1 }, { sprite: 'left-normal.PNG', order: 2 }, { sprite: 'left-rotate.PNG', order: 2 }, { sprite: 'right-normal.PNG', order: 2 }, { sprite: 'right-rotate.PNG', order: 2 }, { sprite: 'place-work.PNG', order: 3 }, { sprite: 'left-piston-normal.PNG', order: 5 }, { sprite: 'left-piston-active.PNG', order: 5 }, { sprite: 'right-piston-normal.PNG', order: 5 }, { sprite: 'right-piston-active.PNG', order: 5 }],
+      spriteOrder: [{ sprite: 'body.PNG', order: 0 }, { sprite: 'face-fuck.PNG', order: 1 }, { sprite: 'face-happy.PNG', order: 1 }, { sprite: 'face-normal.PNG', order: 1 }, { sprite: 'left-normal.PNG', order: 2 }, { sprite: 'left-rotate.PNG', order: 2 }, { sprite: 'right-normal.PNG', order: 2 }, { sprite: 'right-rotate.PNG', order: 2 }, { sprite: 'place-work.PNG', order: 3 }, { sprite: 'left-piston-normal.PNG', order: 5 }, { sprite: 'left-piston-active.PNG', order: 5 }, { sprite: 'right-piston-normal.PNG', order: 5 }, { sprite: 'right-piston-active.PNG', order: 5 }, { sprite: 'black', order: 6 }, { sprite: 'white', order: 6 }],
 
       faceMap: {
         'happy': 'face-happy.PNG',
@@ -20728,10 +20728,10 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
   beforeCreate: function beforeCreate() {
     var type = 'WebGL';
-    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* utils */].isWebGLSupported()) {
+    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* utils */].isWebGLSupported()) {
       type = 'canvas';
     }
-    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* utils */].sayHello(type);
+    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* utils */].sayHello(type);
   },
   mounted: function mounted() {
     var _this = this;
@@ -20762,7 +20762,9 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     });
 
     this.pixiApp.ticker.add(function (delta) {
+      _this.hideSpritesAll(_this.spriteDict);
       _this.renderCurrentPlayer(_this.spriteDict, _this.player);
+      _this.renderCurrentDoll(_this.spriteDict);
     });
   },
 
@@ -20803,10 +20805,24 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       var _this2 = this;
 
       Object.keys(resourceDict).forEach(function (key) {
-        _this2.spriteDict[key] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Sprite */](resourceDict[key].texture);
+        _this2.spriteDict[key] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */](resourceDict[key].texture);
         _this2.spriteDict[key].anchor.x = 0;
         _this2.spriteDict[key].anchor.y = 0;
 
+        if (key === 'tile-set.png') {
+          _this2.spriteDict['white'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 1241, 512, 512)));
+          _this2.spriteDict['white'].width = 128;
+          _this2.spriteDict['white'].height = 128;
+          _this2.spriteDict['white'].anchor.x = 0.5;
+          _this2.spriteDict['white'].anchor.y = 0.5;
+          _this2.spriteDict['black'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 200, 512, 512)));
+          _this2.spriteDict['black'].width = 128;
+          _this2.spriteDict['black'].height = 128;
+          _this2.spriteDict['black'].anchor.x = 0.5;
+          _this2.spriteDict['black'].anchor.y = 0.5;
+
+          return;
+        }
         var ratio = _this2.spriteDict[key].height / _this2.spriteDict[key].width;
         _this2.spriteDict[key].width = _this2.CANVAS_WIDTH;
         _this2.spriteDict[key].height = _this2.CANVAS_WIDTH * ratio;
@@ -20909,6 +20925,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       }).forEach(function (i) {
         _this6.pixiApp.stage.addChild(spriteDict[i.sprite]);
       });
+
       var _target = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* DisplayObject */]();
       _target.setInteractive = true;
       this.pixiApp.stage.addChild(_target);
@@ -20919,10 +20936,20 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         spriteDict[key].visible = false;
       });
     },
+    renderCurrentDoll: function renderCurrentDoll(spriteDict) {
+      if (!this.spriteDict.hasOwnProperty('black') || !this.spriteDict.hasOwnProperty('white')) {
+        return;
+      }
+      spriteDict['black'].visible = true;
+      spriteDict['black'].x = 192;
+      spriteDict['black'].y = 64;
+      spriteDict['white'].visible = true;
+      spriteDict['white'].x = 64;
+      spriteDict['white'].y = 64;
+    },
     renderCurrentPlayer: function renderCurrentPlayer(spriteDict, player) {
-      this.hideSpritesAll(spriteDict);
 
-      if (Object.keys(spriteDict).length !== this.spriteList.length) {
+      if (Object.keys(spriteDict).length < this.spriteList.length) {
         return;
       }
 
@@ -48769,7 +48796,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_b2c47c32_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a3b3d1c0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48789,7 +48816,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_b2c47c32_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a3b3d1c0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48810,7 +48837,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("14b3468e", content, true, {});
+var update = __webpack_require__(35)("5ad954dd", content, true, {});
 
 /***/ }),
 /* 33 */
@@ -49292,11 +49319,11 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pixi_interaction__ = __webpack_require__(15);
 /* unused harmony reexport interaction */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pixi_utils__ = __webpack_require__(1);
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "f", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "h", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pixi_app__ = __webpack_require__(16);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_4__pixi_app__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pixi_core__ = __webpack_require__(0);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "g", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["p"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pixi_extract__ = __webpack_require__(18);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pixi_loaders__ = __webpack_require__(9);
@@ -49330,7 +49357,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25__pixi_graphics__ = __webpack_require__(21);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26__pixi_math__ = __webpack_require__(2);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_26__pixi_math__["j"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27__pixi_mesh__ = __webpack_require__(26);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_28__pixi_mesh_extras__ = __webpack_require__(63);
@@ -49338,7 +49365,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_29__pixi_runner__ = __webpack_require__(17);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__ = __webpack_require__(8);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "e", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "f", function() { return __WEBPACK_IMPORTED_MODULE_30__pixi_sprite__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__pixi_sprite_animated__ = __webpack_require__(64);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pixi_text__ = __webpack_require__(22);
