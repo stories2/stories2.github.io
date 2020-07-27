@@ -48,7 +48,11 @@
           face: 'normal',
           left: false,
           right: false
-        }
+        },
+
+        workLine: [],
+        workLineScale: 6,
+        workLineGap: 10
       }
     },
     beforeCreate: function() {
@@ -76,7 +80,7 @@
             console.log('all sprites are ready');
             this.spriteInit(this.resourceDict);
             console.log('sprite dict', this.spriteDict)
-            this.addSpritesToStage(this.spriteDict, this.spriteOrder);
+            this.addSpritesToStage(this.spriteDict, this.workLine, this.spriteOrder);
           }
         })
         .catch(err => {
@@ -94,7 +98,7 @@
         // console.log(`la ${lastSec} de ${delta}`)
         if (lastSec >= 24) {
           lastSec = 0;
-          this.renderFlip(this.spriteDict);
+          this.renderFlip(this.spriteDict, this.workLine);
         }
       });
     },
@@ -165,6 +169,18 @@
 
           this.spriteDict[key].y = this.CANVAS_HEIGHT - this.spriteDict[key].height;
         })
+
+        Array(this.workLineScale).fill().forEach((_, i) => {
+          this.workLine.push(
+            Sprite.from(new Texture(this.spriteDict['tile-set.png'].texture, new Rectangle(719, 200, 512, 512)))
+          )
+          this.workLine[i].width = 128;
+          this.workLine[i].height = 128;
+          this.workLine[i].anchor.x = 0.5;
+          this.workLine[i].anchor.y = 0.5;
+          this.workLine[i].x = this.CANVAS_WIDTH / 2;
+          this.workLine[i].y = 525 - (this.workLineScale - i) * this.workLineGap;
+        });
       },
       keyInit: function() {
         window.addEventListener('keydown', (e) => {
@@ -245,9 +261,13 @@
       spriteLoader: function () {
         return Promise.allSettled(this.spriteList.map(i => this.spriteLoad(i)))
       },
-      addSpritesToStage: function (spriteDict, order) {
+      addSpritesToStage: function (spriteDict, workLine, order) {
         order.sort((a, b) => a.order - b.order).forEach(i => {
           this.pixiApp.stage.addChild(spriteDict[i.sprite]);
+        })
+
+        workLine.forEach(i => {
+          this.pixiApp.stage.addChild(i);
         })
 
         const _target = new DisplayObject();
@@ -260,11 +280,15 @@
           spriteDict[key].visible = false;
         })
       },
-      renderFlip: function(spriteDict) {
+      renderFlip: function(spriteDict, workLine) {
         spriteDict['body.PNG'].scale.x *= -1;
         spriteDict['face-fuck.PNG'].scale.x *= -1;
         spriteDict['face-happy.PNG'].scale.x *= -1;
         spriteDict['face-normal.PNG'].scale.x *= -1;
+
+        workLine.forEach(i => {
+          i.scale.x *= -1;
+        })
       },
       renderCurrentDoll: function(spriteDict) {
         if (!this.spriteDict.hasOwnProperty('black')
@@ -275,8 +299,8 @@
         spriteDict['black'].x = 192;
         spriteDict['black'].y = 64;
         spriteDict['white'].visible = true;
-        spriteDict['white'].x = this.CANVAS_WIDTH / 2;
-        spriteDict['white'].y = 525;
+        spriteDict['white'].x = 64;
+        spriteDict['white'].y = 64;
       },
       renderCurrentPlayer: function (spriteDict, player) {
 

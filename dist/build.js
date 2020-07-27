@@ -20722,7 +20722,11 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         face: 'normal',
         left: false,
         right: false
-      }
+      },
+
+      workLine: [],
+      workLineScale: 6,
+      workLineGap: 10
     };
   },
 
@@ -20754,7 +20758,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         console.log('all sprites are ready');
         _this.spriteInit(_this.resourceDict);
         console.log('sprite dict', _this.spriteDict);
-        _this.addSpritesToStage(_this.spriteDict, _this.spriteOrder);
+        _this.addSpritesToStage(_this.spriteDict, _this.workLine, _this.spriteOrder);
       }
     }).catch(function (err) {
       console.log('err', err);
@@ -20770,7 +20774,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       // console.log(`la ${lastSec} de ${delta}`)
       if (lastSec >= 24) {
         lastSec = 0;
-        _this.renderFlip(_this.spriteDict);
+        _this.renderFlip(_this.spriteDict, _this.workLine);
       }
     });
   },
@@ -20841,6 +20845,16 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         _this2.spriteDict[key].height = _this2.CANVAS_WIDTH * ratio;
 
         _this2.spriteDict[key].y = _this2.CANVAS_HEIGHT - _this2.spriteDict[key].height;
+      });
+
+      Array(this.workLineScale).fill().forEach(function (_, i) {
+        _this2.workLine.push(__WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict['tile-set.png'].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 200, 512, 512))));
+        _this2.workLine[i].width = 128;
+        _this2.workLine[i].height = 128;
+        _this2.workLine[i].anchor.x = 0.5;
+        _this2.workLine[i].anchor.y = 0.5;
+        _this2.workLine[i].x = _this2.CANVAS_WIDTH / 2;
+        _this2.workLine[i].y = 525 - (_this2.workLineScale - i) * _this2.workLineGap;
       });
     },
     keyInit: function keyInit() {
@@ -20930,13 +20944,17 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         return _this5.spriteLoad(i);
       }));
     },
-    addSpritesToStage: function addSpritesToStage(spriteDict, order) {
+    addSpritesToStage: function addSpritesToStage(spriteDict, workLine, order) {
       var _this6 = this;
 
       order.sort(function (a, b) {
         return a.order - b.order;
       }).forEach(function (i) {
         _this6.pixiApp.stage.addChild(spriteDict[i.sprite]);
+      });
+
+      workLine.forEach(function (i) {
+        _this6.pixiApp.stage.addChild(i);
       });
 
       var _target = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* DisplayObject */]();
@@ -20949,11 +20967,15 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         spriteDict[key].visible = false;
       });
     },
-    renderFlip: function renderFlip(spriteDict) {
+    renderFlip: function renderFlip(spriteDict, workLine) {
       spriteDict['body.PNG'].scale.x *= -1;
       spriteDict['face-fuck.PNG'].scale.x *= -1;
       spriteDict['face-happy.PNG'].scale.x *= -1;
       spriteDict['face-normal.PNG'].scale.x *= -1;
+
+      workLine.forEach(function (i) {
+        i.scale.x *= -1;
+      });
     },
     renderCurrentDoll: function renderCurrentDoll(spriteDict) {
       if (!this.spriteDict.hasOwnProperty('black') || !this.spriteDict.hasOwnProperty('white')) {
@@ -20963,8 +20985,8 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       spriteDict['black'].x = 192;
       spriteDict['black'].y = 64;
       spriteDict['white'].visible = true;
-      spriteDict['white'].x = this.CANVAS_WIDTH / 2;
-      spriteDict['white'].y = 525;
+      spriteDict['white'].x = 64;
+      spriteDict['white'].y = 64;
     },
     renderCurrentPlayer: function renderCurrentPlayer(spriteDict, player) {
 
@@ -48815,7 +48837,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_e875eb92_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_b8664a2c_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48835,7 +48857,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_e875eb92_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_b8664a2c_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48856,7 +48878,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("3764d95a", content, true, {});
+var update = __webpack_require__(35)("bae2d0f4", content, true, {});
 
 /***/ }),
 /* 33 */
