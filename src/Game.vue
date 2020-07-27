@@ -421,6 +421,9 @@
         })
       },
       renderFlip: function(spriteDict, workLine) {
+        if (Object.keys(spriteDict).length < this.spriteList.length) {
+          return;
+        }
         spriteDict['body.PNG'].scale.x *= -1;
         spriteDict['face-fuck.PNG'].scale.x *= -1;
         spriteDict['face-happy.PNG'].scale.x *= -1;
