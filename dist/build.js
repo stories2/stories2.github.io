@@ -20761,10 +20761,17 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       alert('Error while load sprites.');
     });
 
+    var lastSec = 0;
     this.pixiApp.ticker.add(function (delta) {
       _this.hideSpritesAll(_this.spriteDict);
       _this.renderCurrentPlayer(_this.spriteDict, _this.player);
       _this.renderCurrentDoll(_this.spriteDict);
+      lastSec += delta;
+      // console.log(`la ${lastSec} de ${delta}`)
+      if (lastSec >= 24) {
+        lastSec = 0;
+        _this.renderFlip(_this.spriteDict);
+      }
     });
   },
 
@@ -20808,6 +20815,12 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         _this2.spriteDict[key] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */](resourceDict[key].texture);
         _this2.spriteDict[key].anchor.x = 0;
         _this2.spriteDict[key].anchor.y = 0;
+
+        if (key === 'body.PNG' || key === 'face-fuck.PNG' || key === 'face-happy.PNG' || key === 'face-normal.PNG') {
+
+          _this2.spriteDict[key].anchor.x = 0.5;
+          _this2.spriteDict[key].x = _this2.CANVAS_WIDTH / 2;
+        }
 
         if (key === 'tile-set.png') {
           _this2.spriteDict['white'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 1241, 512, 512)));
@@ -20936,6 +20949,12 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         spriteDict[key].visible = false;
       });
     },
+    renderFlip: function renderFlip(spriteDict) {
+      spriteDict['body.PNG'].scale.x *= -1;
+      spriteDict['face-fuck.PNG'].scale.x *= -1;
+      spriteDict['face-happy.PNG'].scale.x *= -1;
+      spriteDict['face-normal.PNG'].scale.x *= -1;
+    },
     renderCurrentDoll: function renderCurrentDoll(spriteDict) {
       if (!this.spriteDict.hasOwnProperty('black') || !this.spriteDict.hasOwnProperty('white')) {
         return;
@@ -20944,8 +20963,8 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       spriteDict['black'].x = 192;
       spriteDict['black'].y = 64;
       spriteDict['white'].visible = true;
-      spriteDict['white'].x = 64;
-      spriteDict['white'].y = 64;
+      spriteDict['white'].x = this.CANVAS_WIDTH / 2;
+      spriteDict['white'].y = 525;
     },
     renderCurrentPlayer: function renderCurrentPlayer(spriteDict, player) {
 
@@ -48796,7 +48815,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a3b3d1c0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_e875eb92_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48816,7 +48835,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_a3b3d1c0_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_e875eb92_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48837,7 +48856,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("5ad954dd", content, true, {});
+var update = __webpack_require__(35)("3764d95a", content, true, {});
 
 /***/ }),
 /* 33 */

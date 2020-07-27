@@ -85,10 +85,17 @@
         });
 
 
+      let lastSec = 0;
       this.pixiApp.ticker.add((delta) => {
         this.hideSpritesAll(this.spriteDict);
         this.renderCurrentPlayer(this.spriteDict, this.player);
         this.renderCurrentDoll(this.spriteDict);
+        lastSec += delta;
+        // console.log(`la ${lastSec} de ${delta}`)
+        if (lastSec >= 24) {
+          lastSec = 0;
+          this.renderFlip(this.spriteDict);
+        }
       });
     },
 
@@ -130,6 +137,13 @@
           this.spriteDict[key] = new Sprite(resourceDict[key].texture)
           this.spriteDict[key].anchor.x = 0;
           this.spriteDict[key].anchor.y = 0;
+
+          if (key === 'body.PNG' ||
+            key === 'face-fuck.PNG' || key === 'face-happy.PNG' || key === 'face-normal.PNG') {
+
+            this.spriteDict[key].anchor.x = 0.5;
+            this.spriteDict[key].x = this.CANVAS_WIDTH / 2;
+          }
 
           if (key === 'tile-set.png') {
             this.spriteDict['white'] = Sprite.from(new Texture(this.spriteDict[key].texture, new Rectangle(719, 1241, 512, 512)));
@@ -246,6 +260,12 @@
           spriteDict[key].visible = false;
         })
       },
+      renderFlip: function(spriteDict) {
+        spriteDict['body.PNG'].scale.x *= -1;
+        spriteDict['face-fuck.PNG'].scale.x *= -1;
+        spriteDict['face-happy.PNG'].scale.x *= -1;
+        spriteDict['face-normal.PNG'].scale.x *= -1;
+      },
       renderCurrentDoll: function(spriteDict) {
         if (!this.spriteDict.hasOwnProperty('black')
           || !this.spriteDict.hasOwnProperty('white')) {
@@ -255,8 +275,8 @@
         spriteDict['black'].x = 192;
         spriteDict['black'].y = 64;
         spriteDict['white'].visible = true;
-        spriteDict['white'].x = 64;
-        spriteDict['white'].y = 64;
+        spriteDict['white'].x = this.CANVAS_WIDTH / 2;
+        spriteDict['white'].y = 525;
       },
       renderCurrentPlayer: function (spriteDict, player) {
 
