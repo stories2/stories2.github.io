@@ -20725,21 +20725,33 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       },
 
       workLine: [],
+      workLineData: [],
       workLineScale: 6,
-      workLineGap: 10
+      workLineGap: 10,
+
+      combo: 0,
+      score: 0,
+
+      textDict: {},
+      time: 30,
+
+      countDown: 6,
+
+      isGameStarted: false
     };
   },
 
   beforeCreate: function beforeCreate() {
     var type = 'WebGL';
-    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* utils */].isWebGLSupported()) {
+    if (!__WEBPACK_IMPORTED_MODULE_0_pixi_js__["i" /* utils */].isWebGLSupported()) {
       type = 'canvas';
     }
-    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* utils */].sayHello(type);
+    __WEBPACK_IMPORTED_MODULE_0_pixi_js__["i" /* utils */].sayHello(type);
   },
   mounted: function mounted() {
     var _this = this;
 
+    this.workLineInit();
     this.initPixiJS();
     this.keyInit();
     this.spriteLoader().then(function (result) {
@@ -20759,6 +20771,8 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         _this.spriteInit(_this.resourceDict);
         console.log('sprite dict', _this.spriteDict);
         _this.addSpritesToStage(_this.spriteDict, _this.workLine, _this.spriteOrder);
+        _this.addDisplayToStage();
+        _this.addTextToStage();
       }
     }).catch(function (err) {
       console.log('err', err);
@@ -20766,15 +20780,41 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     });
 
     var lastSec = 0;
+    var timerSec = 0;
     this.pixiApp.ticker.add(function (delta) {
       _this.hideSpritesAll(_this.spriteDict);
       _this.renderCurrentPlayer(_this.spriteDict, _this.player);
-      _this.renderCurrentDoll(_this.spriteDict);
+      _this.renderCurrentDoll(_this.spriteDict, _this.workLine, _this.workLineData);
       lastSec += delta;
+      timerSec += delta;
       // console.log(`la ${lastSec} de ${delta}`)
       if (lastSec >= 24) {
         lastSec = 0;
         _this.renderFlip(_this.spriteDict, _this.workLine);
+      }
+
+      if (timerSec >= 60) {
+        timerSec = 0;
+        if (_this.countDown <= 0 && _this.time > 0 && _this.textDict.hasOwnProperty('time')) {
+          _this.time--;
+          _this.textDict['time'].text = '' + _this.time;
+        }
+
+        // console.log(this.countDown, this.textDict.hasOwnProperty('countDown'))
+        if (_this.countDown > 1 && _this.textDict.hasOwnProperty('countDown')) {
+          _this.countDown--;
+          _this.textDict['countDown'].text = '' + _this.countDown;
+        } else if (_this.countDown === 1) {
+          _this.countDown--;
+          _this.textDict['countDown'].text = 'START';
+          _this.isGameStarted = true;
+        } else if (_this.countDown === 0) {
+          _this.countDown--;
+          _this.textDict['countDown'].text = '';
+        } else if (_this.time <= 0 && _this.isGameStarted) {
+          _this.isGameStarted = false;
+          _this.textDict['countDown'].text = 'GAME OVER';
+        }
       }
     });
   },
@@ -20791,7 +20831,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       var options = {
         width: this.CANVAS_WIDTH,
         height: this.CANVAS_HEIGHT,
-        transparent: false,
+        transparent: true,
         antialias: true,
         resolution: window.devicePixelRatio || 1
       };
@@ -20812,93 +20852,105 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
       this.$el.appendChild(this.pixiApp.view);
     },
-    spriteInit: function spriteInit(resourceDict) {
+    ranInt: function ranInt(min, max) {
+      min = Math.ceil(min);
+      max = Math.floor(max);
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    },
+    workLineInit: function workLineInit() {
       var _this2 = this;
 
+      Array(this.workLineScale).fill().map(function (_, i) {
+        _this2.workLineData.push(_this2.ranInt(0, 1));
+      });
+    },
+    spriteInit: function spriteInit(resourceDict) {
+      var _this3 = this;
+
       Object.keys(resourceDict).forEach(function (key) {
-        _this2.spriteDict[key] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */](resourceDict[key].texture);
-        _this2.spriteDict[key].anchor.x = 0;
-        _this2.spriteDict[key].anchor.y = 0;
+        _this3.spriteDict[key] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */](resourceDict[key].texture);
+        _this3.spriteDict[key].anchor.x = 0;
+        _this3.spriteDict[key].anchor.y = 0;
 
         if (key === 'body.PNG' || key === 'face-fuck.PNG' || key === 'face-happy.PNG' || key === 'face-normal.PNG') {
 
-          _this2.spriteDict[key].anchor.x = 0.5;
-          _this2.spriteDict[key].x = _this2.CANVAS_WIDTH / 2;
+          _this3.spriteDict[key].anchor.x = 0.5;
+          _this3.spriteDict[key].x = _this3.CANVAS_WIDTH / 2;
         }
 
         if (key === 'tile-set.png') {
-          _this2.spriteDict['white'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 1241, 512, 512)));
-          _this2.spriteDict['white'].width = 128;
-          _this2.spriteDict['white'].height = 128;
-          _this2.spriteDict['white'].anchor.x = 0.5;
-          _this2.spriteDict['white'].anchor.y = 0.5;
-          _this2.spriteDict['black'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 200, 512, 512)));
-          _this2.spriteDict['black'].width = 128;
-          _this2.spriteDict['black'].height = 128;
-          _this2.spriteDict['black'].anchor.x = 0.5;
-          _this2.spriteDict['black'].anchor.y = 0.5;
+          _this3.spriteDict['white'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* Texture */](_this3.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 1241, 512, 512)));
+          _this3.spriteDict['white'].width = 128;
+          _this3.spriteDict['white'].height = 128;
+          _this3.spriteDict['white'].anchor.x = 0.5;
+          _this3.spriteDict['white'].anchor.y = 0.5;
+          _this3.spriteDict['white'].x = 64;
+          _this3.spriteDict['white'].y = 64;
+          _this3.spriteDict['black'] = __WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* Texture */](_this3.spriteDict[key].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 200, 512, 512)));
+          _this3.spriteDict['black'].width = 128;
+          _this3.spriteDict['black'].height = 128;
+          _this3.spriteDict['black'].anchor.x = 0.5;
+          _this3.spriteDict['black'].anchor.y = 0.5;
+          _this3.spriteDict['black'].x = _this3.CANVAS_WIDTH - 64;
+          _this3.spriteDict['black'].y = 64;
 
           return;
         }
-        var ratio = _this2.spriteDict[key].height / _this2.spriteDict[key].width;
-        _this2.spriteDict[key].width = _this2.CANVAS_WIDTH;
-        _this2.spriteDict[key].height = _this2.CANVAS_WIDTH * ratio;
+        var ratio = _this3.spriteDict[key].height / _this3.spriteDict[key].width;
+        _this3.spriteDict[key].width = _this3.CANVAS_WIDTH;
+        _this3.spriteDict[key].height = _this3.CANVAS_WIDTH * ratio;
 
-        _this2.spriteDict[key].y = _this2.CANVAS_HEIGHT - _this2.spriteDict[key].height;
+        _this3.spriteDict[key].y = _this3.CANVAS_HEIGHT - _this3.spriteDict[key].height;
       });
 
       Array(this.workLineScale).fill().forEach(function (_, i) {
-        _this2.workLine.push(__WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Texture */](_this2.spriteDict['tile-set.png'].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 200, 512, 512))));
-        _this2.workLine[i].width = 128;
-        _this2.workLine[i].height = 128;
-        _this2.workLine[i].anchor.x = 0.5;
-        _this2.workLine[i].anchor.y = 0.5;
-        _this2.workLine[i].x = _this2.CANVAS_WIDTH / 2;
-        _this2.workLine[i].y = 525 - (_this2.workLineScale - i) * _this2.workLineGap;
+        _this3.workLine.push(__WEBPACK_IMPORTED_MODULE_0_pixi_js__["f" /* Sprite */].from(new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["h" /* Texture */](_this3.spriteDict['tile-set.png'].texture, new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["e" /* Rectangle */](719, 200, 512, 512))));
+        _this3.workLine[i].width = 128;
+        _this3.workLine[i].height = 128;
+        _this3.workLine[i].anchor.x = 0.5;
+        _this3.workLine[i].anchor.y = 0.5;
+        _this3.workLine[i].x = _this3.CANVAS_WIDTH / 2;
+        _this3.workLine[i].y = 525 - (_this3.workLineScale - i) * _this3.workLineGap;
       });
     },
     keyInit: function keyInit() {
-      var _this3 = this;
+      var _this4 = this;
 
       window.addEventListener('keydown', function (e) {
         switch (e.key) {
           case 'ArrowRight':
-            _this3.player.left = false;
-            _this3.player.right = true;
+            _this4.onTriggerRightDown();
             break;
           case 'ArrowLeft':
-            _this3.player.left = true;
-            _this3.player.right = false;
+            _this4.onTriggerLeftDown();
             break;
         }
       });
       window.addEventListener('keyup', function (e) {
         switch (e.key) {
           case 'ArrowRight':
-            _this3.player.right = false;
+            _this4.onTriggerRightUp();
             break;
           case 'ArrowLeft':
-            _this3.player.left = false;
+            _this4.onTriggerLeftUp();
             break;
         }
       });
       console.log('stage', this.pixiApp.stage);
       this.pixiApp.renderer.plugins.interaction.on('pointerdown', function (event) {
         console.log(event.data.global.x, event.data.global.y, event.data.originalEvent);
-        if (event.data.global.x > _this3.CANVAS_WIDTH / 2) {
-          _this3.player.left = false;
-          _this3.player.right = true;
+        if (event.data.global.x > _this4.CANVAS_WIDTH / 2) {
+          _this4.onTriggerRightDown();
         } else {
-          _this3.player.left = true;
-          _this3.player.right = false;
+          _this4.onTriggerLeftDown();
         }
       });
       this.pixiApp.renderer.plugins.interaction.on('pointerup', function (event) {
         console.log(event.data.global.x, event.data.global.y, event.data.originalEvent);
-        if (event.data.global.x > _this3.CANVAS_WIDTH / 2) {
-          _this3.player.right = false;
+        if (event.data.global.x > _this4.CANVAS_WIDTH / 2) {
+          _this4.onTriggerRightUp();
         } else {
-          _this3.player.left = false;
+          _this4.onTriggerLeftUp();
         }
       });
       // this.pixiApp.stage.mousedown = this.pixiApp.stage.touchstart = (e) => {
@@ -20911,23 +20963,71 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       //   console.log('keypress', e);
       // });
     },
+    onTriggerLeftDown: function onTriggerLeftDown() {
+      this.player.left = true;
+      this.player.right = false;
+      this.checkWorkLine(0);
+    },
+    onTriggerLeftUp: function onTriggerLeftUp() {
+      this.player.left = false;
+    },
+    onTriggerRightDown: function onTriggerRightDown() {
+      this.player.left = false;
+      this.player.right = true;
+      this.checkWorkLine(1);
+    },
+    onTriggerRightUp: function onTriggerRightUp() {
+      this.player.right = false;
+    },
+    checkWorkLine: function checkWorkLine(input) {
+      if (!this.isGameStarted) {
+        return;
+      }
+      console.log(this.workLineData);
+      if (this.workLineData[this.workLineScale - 1] === input) {
+        this.combo++;
+        this.score += 100 + Math.floor(this.combo * 0.1);
+        if (this.combo >= 10) {
+          this.player.face = 'happy';
+        } else {
+          this.player.face = 'normal';
+        }
+      } else {
+        this.combo = 0;
+        this.score -= 90;
+        if (this.score < 0) {
+          this.score = 0;
+        }
+        this.player.face = 'fuck';
+      }
+      this.textDict['comboCnt'].text = 'x' + this.combo;
+      this.textDict['scoreCnt'].text = '' + this.score;
+      console.log('combo ' + this.combo + ' score: ' + this.score);
+      this.swapWorkLine();
+    },
+    swapWorkLine: function swapWorkLine() {
+      for (var i = this.workLineScale - 1; i >= 1; i--) {
+        this.workLineData[i] = this.workLineData[i - 1];
+      }
+      this.workLineData[0] = this.ranInt(0, 1);
+    },
     spriteLoad: function spriteLoad(path) {
-      var _this4 = this;
+      var _this5 = this;
 
       return new Promise(function (resolve, reject) {
         var loader = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["d" /* Loader */]();
-        loader.add('' + _this4.assetsPath + path);
-        console.log('current load', '' + _this4.assetsPath + path);
+        loader.add('' + _this5.assetsPath + path);
+        console.log('current load', '' + _this5.assetsPath + path);
         loader.onComplete.add(function (e, res) {
-          console.log('ok', '' + _this4.assetsPath + path, e, res);
+          console.log('ok', '' + _this5.assetsPath + path, e, res);
           resolve({
             success: true,
             path: path,
-            res: res['' + _this4.assetsPath + path]
+            res: res['' + _this5.assetsPath + path]
           });
         });
         loader.onError.add(function (e) {
-          console.log('fail', '' + _this4.assetsPath + path, e);
+          console.log('fail', '' + _this5.assetsPath + path, e);
           reject({
             success: false,
             path: path,
@@ -20938,28 +21038,70 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
       });
     },
     spriteLoader: function spriteLoader() {
-      var _this5 = this;
+      var _this6 = this;
 
       return Promise.allSettled(this.spriteList.map(function (i) {
-        return _this5.spriteLoad(i);
+        return _this6.spriteLoad(i);
       }));
     },
     addSpritesToStage: function addSpritesToStage(spriteDict, workLine, order) {
-      var _this6 = this;
+      var _this7 = this;
 
       order.sort(function (a, b) {
         return a.order - b.order;
       }).forEach(function (i) {
-        _this6.pixiApp.stage.addChild(spriteDict[i.sprite]);
+        _this7.pixiApp.stage.addChild(spriteDict[i.sprite]);
       });
 
       workLine.forEach(function (i) {
-        _this6.pixiApp.stage.addChild(i);
+        _this7.pixiApp.stage.addChild(i);
       });
-
+    },
+    addDisplayToStage: function addDisplayToStage() {
       var _target = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["c" /* DisplayObject */]();
       _target.setInteractive = true;
       this.pixiApp.stage.addChild(_target);
+    },
+    addTextToStage: function addTextToStage() {
+      this.textDict['time'] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Text */]('TIME');
+      this.textDict['time'].x = this.CANVAS_WIDTH / 2;
+      this.textDict['time'].y = 32;
+      this.textDict['time'].anchor.set(0.5);
+      this.textDict['time'].style.fontSize = 32;
+      this.textDict['comboCnt'] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Text */]('COMBO CNT');
+      this.textDict['comboCnt'].x = this.CANVAS_WIDTH / 2;
+      this.textDict['comboCnt'].y = 64;
+      this.textDict['comboCnt'].anchor.set(0.5);
+      this.textDict['comboCnt'].style.fontSize = 32;
+      this.textDict['combo'] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Text */]('COMBO');
+      this.textDict['combo'].x = this.CANVAS_WIDTH / 2;
+      this.textDict['combo'].y = 96;
+      this.textDict['combo'].anchor.set(0.5);
+      this.textDict['combo'].style.fontSize = 16;
+      this.textDict['scoreCnt'] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Text */]('SCORE CNT');
+      this.textDict['scoreCnt'].x = this.CANVAS_WIDTH / 2;
+      this.textDict['scoreCnt'].y = 128;
+      this.textDict['scoreCnt'].anchor.set(0.5);
+      this.textDict['scoreCnt'].style.fontSize = 32;
+      this.textDict['score'] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Text */]('SCORE');
+      this.textDict['score'].x = this.CANVAS_WIDTH / 2;
+      this.textDict['score'].y = 160;
+      this.textDict['score'].anchor.set(0.5);
+      this.textDict['score'].style.fontSize = 16;
+      this.textDict['countDown'] = new __WEBPACK_IMPORTED_MODULE_0_pixi_js__["g" /* Text */]('COUNTDOWN');
+      this.textDict['countDown'].x = this.CANVAS_WIDTH / 2;
+      this.textDict['countDown'].y = this.CANVAS_HEIGHT / 2;
+      this.textDict['countDown'].anchor.set(0.5);
+      this.textDict['countDown'].style.fontSize = 48;
+      console.log('text', this.textDict['score']);
+      // this.textDict['score'].fontSize = 16;
+
+      this.pixiApp.stage.addChild(this.textDict['time']);
+      this.pixiApp.stage.addChild(this.textDict['comboCnt']);
+      this.pixiApp.stage.addChild(this.textDict['combo']);
+      this.pixiApp.stage.addChild(this.textDict['scoreCnt']);
+      this.pixiApp.stage.addChild(this.textDict['score']);
+      this.pixiApp.stage.addChild(this.textDict['countDown']);
     },
 
     hideSpritesAll: function hideSpritesAll(spriteDict) {
@@ -20977,16 +21119,23 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
         i.scale.x *= -1;
       });
     },
-    renderCurrentDoll: function renderCurrentDoll(spriteDict) {
+    renderCurrentDoll: function renderCurrentDoll(spriteDict, workLine, workLineData) {
       if (!this.spriteDict.hasOwnProperty('black') || !this.spriteDict.hasOwnProperty('white')) {
         return;
       }
       spriteDict['black'].visible = true;
-      spriteDict['black'].x = 192;
-      spriteDict['black'].y = 64;
       spriteDict['white'].visible = true;
-      spriteDict['white'].x = 64;
-      spriteDict['white'].y = 64;
+
+      workLine.forEach(function (i, index) {
+        switch (workLineData[index]) {
+          case 0:
+            i.texture = spriteDict['black'].texture;
+            break;
+          case 1:
+            i.texture = spriteDict['white'].texture;
+            break;
+        }
+      });
     },
     renderCurrentPlayer: function renderCurrentPlayer(spriteDict, player) {
 
@@ -48837,7 +48986,7 @@ process.umask = function() { return 0; };
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__ = __webpack_require__(11);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_b8664a2c_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_26038cd6_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__ = __webpack_require__(65);
 function injectStyle (ssrContext) {
   __webpack_require__(32)
 }
@@ -48857,7 +49006,7 @@ var __vue_scopeId__ = null
 var __vue_module_identifier__ = null
 var Component = normalizeComponent(
   __WEBPACK_IMPORTED_MODULE_0__babel_loader_node_modules_vue_loader_lib_selector_type_script_index_0_Game_vue__["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_b8664a2c_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
+  __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_template_compiler_index_id_data_v_26038cd6_hasScoped_false_buble_transforms_node_modules_vue_loader_lib_selector_type_template_index_0_Game_vue__["a" /* default */],
   __vue_template_functional__,
   __vue_styles__,
   __vue_scopeId__,
@@ -48878,7 +49027,7 @@ var content = __webpack_require__(33);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(35)("bae2d0f4", content, true, {});
+var update = __webpack_require__(35)("39032136", content, true, {});
 
 /***/ }),
 /* 33 */
@@ -49360,11 +49509,11 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__pixi_interaction__ = __webpack_require__(15);
 /* unused harmony reexport interaction */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__pixi_utils__ = __webpack_require__(1);
-/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "h", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
+/* harmony reexport (module object) */ __webpack_require__.d(__webpack_exports__, "i", function() { return __WEBPACK_IMPORTED_MODULE_3__pixi_utils__; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__pixi_app__ = __webpack_require__(16);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_4__pixi_app__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__pixi_core__ = __webpack_require__(0);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "g", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["p"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "h", function() { return __WEBPACK_IMPORTED_MODULE_5__pixi_core__["p"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__pixi_extract__ = __webpack_require__(18);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__pixi_loaders__ = __webpack_require__(9);
@@ -49410,7 +49559,7 @@ module.exports = function normalizeComponent (
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__pixi_sprite_animated__ = __webpack_require__(64);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__pixi_text__ = __webpack_require__(22);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "g", function() { return __WEBPACK_IMPORTED_MODULE_32__pixi_text__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__pixi_settings__ = __webpack_require__(4);
 /* unused harmony namespace reexport */
 /*!
