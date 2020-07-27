@@ -4,7 +4,7 @@
 
 <script>
   import { utils, Application, Loader, Sprite, stage, Container,
-            RenderTexture, Texture, Rectangle,
+            RenderTexture, Texture, Rectangle, Text,
             DisplayObject} from 'pixi.js';
   export default {
     name: "Game",
@@ -51,8 +51,19 @@
         },
 
         workLine: [],
+        workLineData: [],
         workLineScale: 6,
-        workLineGap: 10
+        workLineGap: 10,
+
+        combo: 0,
+        score: 0,
+
+        textDict: {},
+        time: 30,
+
+        countDown: 6,
+
+        isGameStarted: false
       }
     },
     beforeCreate: function() {
@@ -63,6 +74,7 @@
       utils.sayHello(type);
     },
     mounted: function() {
+      this.workLineInit();
       this.initPixiJS();
       this.keyInit();
       this.spriteLoader()
@@ -81,6 +93,8 @@
             this.spriteInit(this.resourceDict);
             console.log('sprite dict', this.spriteDict)
             this.addSpritesToStage(this.spriteDict, this.workLine, this.spriteOrder);
+            this.addDisplayToStage();
+            this.addTextToStage();
           }
         })
         .catch(err => {
@@ -90,15 +104,41 @@
 
 
       let lastSec = 0;
+      let timerSec = 0;
       this.pixiApp.ticker.add((delta) => {
         this.hideSpritesAll(this.spriteDict);
         this.renderCurrentPlayer(this.spriteDict, this.player);
-        this.renderCurrentDoll(this.spriteDict);
+        this.renderCurrentDoll(this.spriteDict, this.workLine, this.workLineData);
         lastSec += delta;
+        timerSec += delta;
         // console.log(`la ${lastSec} de ${delta}`)
         if (lastSec >= 24) {
           lastSec = 0;
           this.renderFlip(this.spriteDict, this.workLine);
+        }
+
+        if (timerSec >= 60) {
+          timerSec = 0;
+          if (this.countDown <= 0 && this.time > 0 && this.textDict.hasOwnProperty('time')) {
+            this.time --;
+            this.textDict['time'].text = `${this.time}`
+          }
+
+          // console.log(this.countDown, this.textDict.hasOwnProperty('countDown'))
+          if (this.countDown > 1 && this.textDict.hasOwnProperty('countDown')) {
+            this.countDown --;
+            this.textDict['countDown'].text = `${this.countDown}`
+          } else if (this.countDown === 1) {
+            this.countDown --;
+            this.textDict['countDown'].text = `START`
+            this.isGameStarted = true;
+          } else if (this.countDown === 0) {
+            this.countDown --;
+            this.textDict['countDown'].text = ``
+          } else if (this.time <= 0 && this.isGameStarted) {
+            this.isGameStarted = false;
+            this.textDict['countDown'].text = `GAME OVER`;
+          }
         }
       });
     },
@@ -115,7 +155,7 @@
         const options = {
           width: this.CANVAS_WIDTH,
           height: this.CANVAS_HEIGHT,
-          transparent: false,
+          transparent: true,
           antialias: true,
           resolution: window.devicePixelRatio || 1
         };
@@ -136,6 +176,16 @@
 
         this.$el.appendChild(this.pixiApp.view)
       },
+      ranInt: function(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      },
+      workLineInit: function() {
+        Array(this.workLineScale).fill().map((_, i) => {
+          this.workLineData.push(this.ranInt(0, 1));
+        })
+      },
       spriteInit: function (resourceDict) {
         Object.keys(resourceDict).forEach(key => {
           this.spriteDict[key] = new Sprite(resourceDict[key].texture)
@@ -155,11 +205,15 @@
             this.spriteDict['white'].height = 128;
             this.spriteDict['white'].anchor.x = 0.5;
             this.spriteDict['white'].anchor.y = 0.5;
+            this.spriteDict['white'].x = 64;
+            this.spriteDict['white'].y = 64;
             this.spriteDict['black'] = Sprite.from(new Texture(this.spriteDict[key].texture, new Rectangle(719, 200, 512, 512)));
             this.spriteDict['black'].width = 128;
             this.spriteDict['black'].height = 128;
             this.spriteDict['black'].anchor.x = 0.5;
             this.spriteDict['black'].anchor.y = 0.5;
+            this.spriteDict['black'].x = this.CANVAS_WIDTH - 64;
+            this.spriteDict['black'].y = 64;
 
             return;
           }
@@ -186,22 +240,20 @@
         window.addEventListener('keydown', (e) => {
           switch (e.key) {
             case 'ArrowRight':
-              this.player.left = false;
-              this.player.right = true;
+              this.onTriggerRightDown();
               break;
             case 'ArrowLeft':
-              this.player.left = true;
-              this.player.right = false;
+              this.onTriggerLeftDown();
               break;
           }
         });
         window.addEventListener('keyup', (e) => {
           switch (e.key) {
             case 'ArrowRight':
-              this.player.right = false;
+              this.onTriggerRightUp();
               break;
             case 'ArrowLeft':
-              this.player.left = false;
+              this.onTriggerLeftUp();
               break;
           }
         });
@@ -209,19 +261,17 @@
         this.pixiApp.renderer.plugins.interaction.on( 'pointerdown', ( event ) => {
           console.log( event.data.global.x, event.data.global.y, event.data.originalEvent )
           if (event.data.global.x > this.CANVAS_WIDTH / 2) {
-            this.player.left = false;
-            this.player.right = true;
+            this.onTriggerRightDown();
           } else {
-            this.player.left = true;
-            this.player.right = false;
+            this.onTriggerLeftDown();
           }
         });
         this.pixiApp.renderer.plugins.interaction.on( 'pointerup', ( event ) => {
           console.log( event.data.global.x, event.data.global.y, event.data.originalEvent )
           if (event.data.global.x > this.CANVAS_WIDTH / 2) {
-            this.player.right = false;
+            this.onTriggerRightUp();
           } else {
-            this.player.left = false;
+            this.onTriggerLeftUp();
           }
         } );
         // this.pixiApp.stage.mousedown = this.pixiApp.stage.touchstart = (e) => {
@@ -233,6 +283,54 @@
         // window.addEventListener('keypress', (e) => {
         //   console.log('keypress', e);
         // });
+      },
+      onTriggerLeftDown: function() {
+        this.player.left = true;
+        this.player.right = false;
+        this.checkWorkLine(0);
+      },
+      onTriggerLeftUp: function() {
+        this.player.left = false;
+      },
+      onTriggerRightDown: function() {
+        this.player.left = false;
+        this.player.right = true;
+        this.checkWorkLine(1);
+      },
+      onTriggerRightUp: function() {
+        this.player.right = false;
+      },
+      checkWorkLine: function(input) {
+        if (!this.isGameStarted) {
+          return;
+        }
+        console.log(this.workLineData);
+        if (this.workLineData[this.workLineScale - 1] === input) {
+          this.combo ++;
+          this.score += 100 + Math.floor(this.combo * 0.1);
+          if (this.combo >= 10) {
+            this.player.face = 'happy';
+          } else {
+            this.player.face = 'normal';
+          }
+        } else {
+          this.combo = 0;
+          this.score -= 90;
+          if (this.score < 0) {
+            this.score = 0;
+          }
+          this.player.face = 'fuck';
+        }
+        this.textDict['comboCnt'].text = `x${this.combo}`
+        this.textDict['scoreCnt'].text = `${this.score}`;
+        console.log(`combo ${this.combo} score: ${this.score}`)
+        this.swapWorkLine();
+      },
+      swapWorkLine: function() {
+        for(let i = this.workLineScale - 1; i >= 1; i --) {
+          this.workLineData[i] = this.workLineData[i - 1];
+        }
+        this.workLineData[0] = this.ranInt(0, 1);
       },
       spriteLoad: function (path) {
         return new Promise((resolve, reject) => {
@@ -269,10 +367,52 @@
         workLine.forEach(i => {
           this.pixiApp.stage.addChild(i);
         })
-
+      },
+      addDisplayToStage: function() {
         const _target = new DisplayObject();
         _target.setInteractive = true;
         this.pixiApp.stage.addChild(_target);
+      },
+      addTextToStage: function() {
+        this.textDict['time'] = new Text('TIME');
+        this.textDict['time'].x = this.CANVAS_WIDTH / 2;
+        this.textDict['time'].y = 32;
+        this.textDict['time'].anchor.set(0.5);
+        this.textDict['time'].style.fontSize = 32;
+        this.textDict['comboCnt'] = new Text('COMBO CNT');
+        this.textDict['comboCnt'].x = this.CANVAS_WIDTH / 2;
+        this.textDict['comboCnt'].y = 64;
+        this.textDict['comboCnt'].anchor.set(0.5);
+        this.textDict['comboCnt'].style.fontSize = 32;
+        this.textDict['combo'] = new Text('COMBO');
+        this.textDict['combo'].x = this.CANVAS_WIDTH / 2;
+        this.textDict['combo'].y = 96;
+        this.textDict['combo'].anchor.set(0.5);
+        this.textDict['combo'].style.fontSize = 16;
+        this.textDict['scoreCnt'] = new Text('SCORE CNT');
+        this.textDict['scoreCnt'].x = this.CANVAS_WIDTH / 2;
+        this.textDict['scoreCnt'].y = 128;
+        this.textDict['scoreCnt'].anchor.set(0.5);
+        this.textDict['scoreCnt'].style.fontSize = 32;
+        this.textDict['score'] = new Text('SCORE');
+        this.textDict['score'].x = this.CANVAS_WIDTH / 2;
+        this.textDict['score'].y = 160;
+        this.textDict['score'].anchor.set(0.5);
+        this.textDict['score'].style.fontSize = 16;
+        this.textDict['countDown'] = new Text('COUNTDOWN');
+        this.textDict['countDown'].x = this.CANVAS_WIDTH / 2;
+        this.textDict['countDown'].y = this.CANVAS_HEIGHT / 2;
+        this.textDict['countDown'].anchor.set(0.5);
+        this.textDict['countDown'].style.fontSize = 48;
+        console.log('text', this.textDict['score'])
+        // this.textDict['score'].fontSize = 16;
+
+        this.pixiApp.stage.addChild(this.textDict['time']);
+        this.pixiApp.stage.addChild(this.textDict['comboCnt']);
+        this.pixiApp.stage.addChild(this.textDict['combo']);
+        this.pixiApp.stage.addChild(this.textDict['scoreCnt']);
+        this.pixiApp.stage.addChild(this.textDict['score']);
+        this.pixiApp.stage.addChild(this.textDict['countDown']);
       },
 
       hideSpritesAll: function(spriteDict) {
@@ -290,17 +430,24 @@
           i.scale.x *= -1;
         })
       },
-      renderCurrentDoll: function(spriteDict) {
+      renderCurrentDoll: function(spriteDict, workLine, workLineData) {
         if (!this.spriteDict.hasOwnProperty('black')
           || !this.spriteDict.hasOwnProperty('white')) {
           return;
         }
         spriteDict['black'].visible = true;
-        spriteDict['black'].x = 192;
-        spriteDict['black'].y = 64;
         spriteDict['white'].visible = true;
-        spriteDict['white'].x = 64;
-        spriteDict['white'].y = 64;
+
+        workLine.forEach((i, index) => {
+          switch (workLineData[index]) {
+            case 0:
+              i.texture = spriteDict['black'].texture;
+              break;
+            case 1:
+              i.texture = spriteDict['white'].texture;
+              break;
+          }
+        });
       },
       renderCurrentPlayer: function (spriteDict, player) {
 
